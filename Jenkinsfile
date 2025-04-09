@@ -1,11 +1,7 @@
 pipeline {
-    agent {
-        node {
-            label 'docker-agent-node'
-        }
-    }
-    stages {
-       
+    agent any
+
+    stages {      
         stage('Instalar Dependencias') {
             steps {
                 script {
