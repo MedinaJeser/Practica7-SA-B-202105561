@@ -1,28 +1,43 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18' // Usamos una imagen de Node.js (puedes elegir otra versión si prefieres)
+    agent any
+
+    environment {
+        NODE_ENV = 'test'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clona el repositorio
+                checkout scm
+            }
+        }
+
+        stage('Instalar dependencias') {
+            steps {
+                // Instala dependencias del proyecto
+                sh 'cd users'
+                sh 'npm install'
+            }
+        }
+
+        stage('Ejecutar pruebas') {
+            steps {
+                // Ejecuta los tests del proyecto
+                sh 'npm run test'
+            }
         }
     }
 
-    stages {      
-        stage('Instalar Dependencias') {
-            steps {
-                script {
-                    // Instalar dependencias dentro del contenedor Docker
-                    sh 'cd users'
-                    sh 'npm install'
-                }
-            }
+    post {
+        always {
+            echo 'Pipeline finalizada'
         }
-
-        stage('Ejecutar Pruebas') {
-            steps {
-                script {
-                    // Ejecutar pruebas dentro del contenedor Docker
-                    sh 'npm test'
-                }
-            }
+        success {
+            echo '✅ Todo salió bien'
+        }
+        failure {
+            echo '❌ Algo falló'
         }
     }
 }
