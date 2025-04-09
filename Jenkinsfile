@@ -6,7 +6,7 @@ pipeline {
     }
 
     tools {
-        nodejs 'node22'
+        nodejs 'recent node'
     }
 
     stages {
