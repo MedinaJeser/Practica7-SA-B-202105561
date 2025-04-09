@@ -1,8 +1,6 @@
 pipeline {
     agent any
 
-    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-
     environment {
         NODE_ENV = 'test'
         IMAGE_NAME = "jsrmedina/users-service-p7:${commit}"
@@ -17,6 +15,15 @@ pipeline {
             steps {
                 // Clona el repositorio
                 checkout scm
+            }
+        }
+
+        stage('Obtener commit hash') {
+            steps {
+                script {
+                    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.IMAGE_NAME = "jeser/users-service:${commit}"
+                }
             }
         }
 
