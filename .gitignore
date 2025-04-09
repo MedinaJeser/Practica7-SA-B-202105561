@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+
+# Compiled output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+log/
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*.local
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Optional npm cache directory
+.npm/
+
+# Nest CLI files
+nestjs-cli.json
+
+# Others
+*.tgz
+.pnp.*
+.cache/

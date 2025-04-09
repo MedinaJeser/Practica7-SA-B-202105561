@@ -1,0 +1,47 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.py[cod]
+*$py.class
+.pytest_cache
+.coverage
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Local development settings
+.env.local
+.env.development
+.env.test
+
+# Dependencies
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution/packaging
+dist/
+build/
+*.egg-info/
+
+# Git
+.git
+.gitignore
+
+# Docker
+.docker
