@@ -20,7 +20,9 @@ pipeline {
         stage('Instalar dependencias') {
             steps {
                 // Instala dependencias del proyecto
+                sh 'ls'
                 sh 'cd users'
+                sh 'ls'
                 sh 'npm install'
             }
         }
