@@ -5,6 +5,10 @@ pipeline {
         NODE_ENV = 'test'
     }
 
+    tools {
+        nodejs 'node22'
+    }
+
     stages {
         stage('Checkout') {
             steps {
