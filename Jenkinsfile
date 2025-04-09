@@ -1,10 +1,12 @@
 pipeline {
     agent {
-        node {      
-            label 'docker-agent-node'      
+        docker {
+            image 'node:18'
+            args '-u root:root'  
         }
     }
     stages {
+       
         stage('Instalar Dependencias') {
             steps {
                 script {
