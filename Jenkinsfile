@@ -19,18 +19,18 @@ pipeline {
 
         stage('Instalar dependencias') {
             steps {
-                // Instala dependencias del proyecto
-                sh 'ls'
-                sh 'cd ./users'
-                sh 'ls'
-                sh 'npm install'
+                dir('users') {
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Ejecutar pruebas') {
             steps {
-                // Ejecuta los tests del proyecto
-                sh 'npm run test'
+                dir('users') {
+                    // Ejecuta los tests de la aplicación
+                    sh 'npm run test'
+                }
             }
         }
     }
