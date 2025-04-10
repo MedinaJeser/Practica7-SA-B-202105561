@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: evaluations-ms-container
-          image: jsrmedina/evaluations-ms:latest
+          image: IMAGE_NAME
           ports:
             - containerPort: 8001
           env:

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: courses-ms-container
-          image: jsrmedina/courses-ms:latest
+          image: IMAGE_NAME
           ports:
             - containerPort: 3002
           env:

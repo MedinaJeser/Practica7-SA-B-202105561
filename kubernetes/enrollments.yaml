@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: enrollments-ms-container
-          image: jsrmedina/enrollments-ms:latest
+          image: IMAGE_NAME
           ports:
             - containerPort: 8002
           env:
