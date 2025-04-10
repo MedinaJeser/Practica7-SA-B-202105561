@@ -540,6 +540,8 @@ Una vez completadas todas las etapas, el pipeline finaliza con una sección post
 
 ![Jenkins Output](./imgs/jenkins-output.png)
 
+![Jenkins Final Output](./imgs/jenkins-final-output.png)
+
 ![Deployments Lens](./imgs/deployments-lens.png)
 
 ![Deployments Terminal](./imgs/deployments-terminal.png)
