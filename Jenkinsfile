@@ -50,13 +50,14 @@ pipeline {
         //     }
         // }
 
-        // stage('Construir imagen Docker') {
-        //     steps {
-        //         dir('users') {
-        //             sh "docker build -t $IMAGE_NAME ."
-        //         }
-        //     }
-        // }
+        stage('Construir imagen Docker') {
+            steps {
+                dir('users') {
+                    echo "Construyendo la imagen Docker: ${IMAGE_NAME}"
+                    // sh "docker build -t $IMAGE_NAME ."
+                }
+            }
+        }
 
         // stage('Push a Docker Hub') {
         //     steps {
