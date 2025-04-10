@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         NODE_ENV = 'test'
+        GIT_COMMIT_SHORT = ''
         IMAGE_NAME = "jsrmedina/users-service-p7"
         PROJECT_ID = 'sa-projects-10101'
         CLUSTER_NAME = 'cluster-sa-p7'
@@ -18,7 +19,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Clona el repositorio
                 checkout scm
             }
         }
@@ -26,9 +26,9 @@ pipeline {
         stage('Obtener commit hash') {
             steps {
                 script {
-                    def commit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.IMAGE_NAME = "jsrmedina/users-service:${commit}"
-                    echo "Commit ID: ${commit}"
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.IMAGE_NAME = "jsrmedina/users-service:${env.GIT_COMMIT_SHORT}"
+                    echo "Commit ID: ${env.GIT_COMMIT_SHORT}"
                     echo "Imagen Docker: ${env.IMAGE_NAME}"
                 }
             }
