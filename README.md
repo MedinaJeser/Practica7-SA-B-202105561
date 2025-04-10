@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: users-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 3001
           env:
@@ -93,7 +93,7 @@ spec:
     spec:
       containers:
         - name: courses-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 3002
           env:
@@ -162,7 +162,7 @@ spec:
     spec:
       containers:
         - name: enrollments-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 8002
           env:
@@ -231,7 +231,7 @@ spec:
     spec:
       containers:
         - name: evaluations-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 8001
           env:
@@ -282,7 +282,7 @@ spec:
 
 # Configuración del pipeline CI/CD para construir, probar y desplegar el código.
 
-```Jenkinsfile
+```groovy
 pipeline {
     agent any
 
@@ -291,7 +291,7 @@ pipeline {
         COURSES_BASE_IMAGE_NAME = "jsrmedina/courses-service-p7"
         ENROLLMENTS_BASE_IMAGE_NAME = "jsrmedina/enrollments-service-p7"
         EVALUATIONS_BASE_IMAGE_NAME = "jsrmedina/evaluations-service-p7"
-        
+
         PROJECT_ID = 'sa-projects-10101'
         CLUSTER_NAME = 'cluster-sa-p7'
         LOCATION = 'us-central1-a'
@@ -329,7 +329,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Execute tests') {
             parallel {
                 stage ('USERS: Execute tests') {
@@ -356,13 +356,13 @@ pipeline {
                         def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                         env.GIT_COMMIT_SHORT = commitHash
                         env.USERS_FULL_IMAGE_NAME = "${env.USERS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
-                        env.COURSES_FULL_IMAGE_NAME = "${env.COURSES_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"   
+                        env.COURSES_FULL_IMAGE_NAME = "${env.COURSES_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
                         env.ENROLLMENTS_FULL_IMAGE_NAME = "${env.ENROLLMENTS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
-                        env.EVALUATIONS_FULL_IMAGE_NAME = "${env.EVALUATIONS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"                 
+                        env.EVALUATIONS_FULL_IMAGE_NAME = "${env.EVALUATIONS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
                     }
                 }
             }
-        
+
         stage('Build Docker images') {
             parallel {
                 stage('Build USERS Docker image') {
@@ -392,7 +392,7 @@ pipeline {
                             sh "docker build -t ${EVALUATIONS_FULL_IMAGE_NAME} ."
                         }
                     }
-                }        
+                }
             }
         }
 
@@ -440,16 +440,16 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Google Kubernetes') {
             steps {
-                
-                // Users deployment
-                sh "sed -i 's|IMAGE_NAME|${USERS_FULL_IMAGE_NAME}|g' ./kubernetes/users.yaml"
 
-                step([$class: 'KubernetesEngineBuilder', 
-                        projectId: env.PROJECT_ID, 
-                        clusterName: env.CLUSTER_NAME, 
+                // Users deployment
+                sh "sed -i 's|IMAGE_NAME_SETTER|${USERS_FULL_IMAGE_NAME}|g' ./kubernetes/users.yaml"
+
+                step([$class: 'KubernetesEngineBuilder',
+                        projectId: env.PROJECT_ID,
+                        clusterName: env.CLUSTER_NAME,
                         location: env.LOCATION,
                         manifestPattern: './kubernetes/users.yaml',
                         credentialsId: env.CREDENTIALS_ID,
@@ -457,33 +457,33 @@ pipeline {
 
 
                 // Courses deployment
-                sh "sed -i 's|IMAGE_NAME|${COURSES_FULL_IMAGE_NAME}|g' ./kubernetes/courses.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${COURSES_FULL_IMAGE_NAME}|g' ./kubernetes/courses.yaml"
 
-                step([$class: 'KubernetesEngineBuilder', 
-                        projectId: env.PROJECT_ID, 
-                        clusterName: env.CLUSTER_NAME, 
+                step([$class: 'KubernetesEngineBuilder',
+                        projectId: env.PROJECT_ID,
+                        clusterName: env.CLUSTER_NAME,
                         location: env.LOCATION,
                         manifestPattern: './kubernetes/courses.yaml',
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: false])
 
                 // Enrollments deployment
-                sh "sed -i 's|IMAGE_NAME|${ENROLLMENTS_FULL_IMAGE_NAME}|g' ./kubernetes/enrollments.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${ENROLLMENTS_FULL_IMAGE_NAME}|g' ./kubernetes/enrollments.yaml"
 
-                step([$class: 'KubernetesEngineBuilder', 
-                        projectId: env.PROJECT_ID, 
-                        clusterName: env.CLUSTER_NAME, 
+                step([$class: 'KubernetesEngineBuilder',
+                        projectId: env.PROJECT_ID,
+                        clusterName: env.CLUSTER_NAME,
                         location: env.LOCATION,
                         manifestPattern: './kubernetes/enrollments.yaml',
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: false])
 
                 // Evaluations deployment
-                sh "sed -i 's|IMAGE_NAME|${EVALUATIONS_FULL_IMAGE_NAME}|g' ./kubernetes/evaluations.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${EVALUATIONS_FULL_IMAGE_NAME}|g' ./kubernetes/evaluations.yaml"
 
-                step([$class: 'KubernetesEngineBuilder', 
-                        projectId: env.PROJECT_ID, 
-                        clusterName: env.CLUSTER_NAME, 
+                step([$class: 'KubernetesEngineBuilder',
+                        projectId: env.PROJECT_ID,
+                        clusterName: env.CLUSTER_NAME,
                         location: env.LOCATION,
                         manifestPattern: './kubernetes/evaluations.yaml',
                         credentialsId: env.CREDENTIALS_ID,
@@ -505,7 +505,6 @@ pipeline {
         }
     }
 }
-
 ```
 
 # Descripción de cómo funciona el pipeline
@@ -528,7 +527,7 @@ Luego, el pipeline se estructura en varias etapas:
 
 - Subida de imágenes a Docker Hub: Una vez construidas, las imágenes se suben al repositorio remoto Docker Hub utilizando credenciales previamente configuradas en Jenkins. Esta etapa también se ejecuta en paralelo para cada servicio.
 
-- Despliegue en Google Kubernetes Engine (GKE): Finalmente, las imágenes subidas se despliegan en el clúster de Kubernetes. Para ello, se actualizan los archivos YAML de despliegue reemplazando la etiqueta IMAGE_NAME por el nombre completo de la imagen construida. Luego, se utiliza el plugin KubernetesEngineBuilder para aplicar los manifiestos y desplegar cada servicio en su respectivo contenedor dentro del clúster.
+- Despliegue en Google Kubernetes Engine (GKE): Finalmente, las imágenes subidas se despliegan en el clúster de Kubernetes. Para ello, se actualizan los archivos YAML de despliegue reemplazando la etiqueta IMAGE_NAME_SETTER por el nombre completo de la imagen construida. Luego, se utiliza el plugin KubernetesEngineBuilder para aplicar los manifiestos y desplegar cada servicio en su respectivo contenedor dentro del clúster.
 
 Una vez completadas todas las etapas, el pipeline finaliza con una sección post que notifica si la ejecución fue exitosa o si ocurrió algún error. En caso de éxito, se imprime el mensaje "✅ Pipeline finalizada correctamente", y en caso de fallo, se muestra "❌ Error durante la ejecución de la pipeline".
 
