@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-sa-p7
+  namespace: sa-p7
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /users
+            pathType: Prefix
+            backend:
+              service:
+                name: users-ms-service
+                port:
+                  number: 3001
+          - path: /courses
+            pathType: Prefix
+            backend:
+              service:
+                name: courses-ms-service
+                port:
+                  number: 3002
+          - path: /evaluations
+            pathType: Prefix
+            backend:
+              service:
+                name: evaluations-ms-service
+                port:
+                  number: 8001
+          - path: /enrollments
+            pathType: Prefix
+            backend:
+              service:
+                name: enrollments-ms-service
+                port:
+                  number: 8002

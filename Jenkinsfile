@@ -62,6 +62,19 @@ pipeline {
                 }
             }
         }
+
+        stage('Autenticarse en GKE') {
+            steps {
+                withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                        gcloud config set project sa-projects-10101
+                        gcloud container clusters get-credentials cluster-sa-p7 --zone us-central1-a --project sa-projects-10101
+                    '''
+                }
+            }
+        }
+
     }
 
     post {

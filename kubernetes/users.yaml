@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-ms-deployment
+  namespace: sa-p7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-ms
+  template:
+    metadata:
+      labels:
+        app: users-ms
+    spec:
+      containers:
+        - name: users-ms-container
+          image: ${IMAGE}
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DATABASE_URL
+              value: "mongodb+srv://admin-sa:sacluster00@clustersa.at5ngtq.mongodb.net/users_ms?retryWrites=true&w=majority&appName=ClusterSA"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-ms-service
+  namespace: sa-p7
+spec:
+  selector:
+    app: users-ms
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: users-ms-hpa
+  namespace: sa-p7
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: users-ms-deployment
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
