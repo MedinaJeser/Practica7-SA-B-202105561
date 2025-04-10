@@ -28,60 +28,61 @@ pipeline {
                 script {
                     def commit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.IMAGE_NAME = "jeser/users-service:${commit}"
+                    echo "Commit ID: ${commit}"
                 }
             }
         }
 
-        stage('Instalar dependencias') {
-            steps {
-                dir('users') {
-                    sh 'npm install'
-                }
-            }
-        }
+        // stage('Instalar dependencias') {
+        //     steps {
+        //         dir('users') {
+        //             sh 'npm install'
+        //         }
+        //     }
+        // }
 
-        stage('Ejecutar pruebas') {
-            steps {
-                dir('users') {
-                    // Ejecuta los tests de la aplicación
-                    sh 'npm run test'
-                }
-            }
-        }
+        // stage('Ejecutar pruebas') {
+        //     steps {
+        //         dir('users') {
+        //             // Ejecuta los tests de la aplicación
+        //             sh 'npm run test'
+        //         }
+        //     }
+        // }
 
-        stage('Construir imagen Docker') {
-            steps {
-                dir('users') {
-                    sh "docker build -t $IMAGE_NAME ."
-                }
-            }
-        }
+        // stage('Construir imagen Docker') {
+        //     steps {
+        //         dir('users') {
+        //             sh "docker build -t $IMAGE_NAME ."
+        //         }
+        //     }
+        // }
 
-        stage('Push a Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push $IMAGE_NAME
-                    '''
-                }
-            }
-        }
+        // stage('Push a Docker Hub') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        //             sh '''
+        //                 echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+        //                 docker push $IMAGE_NAME
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Configurar GKE') {
-            steps {
-                sh "sed -i 's|IMAGE_NAME|${IMAGE_NAME}|g' ./kubernetes/users.yaml"
+        // stage('Configurar GKE') {
+        //     steps {
+        //         sh "sed -i 's|IMAGE_NAME|${IMAGE_NAME}|g' ./kubernetes/users.yaml"
 
-                step([$class: 'KubernetesEngineBuilder', 
-                        projectId: env.PROJECT_ID, 
-                        clusterName: env.CLUSTER_NAME, 
-                        location: env.LOCATION,
-                        manifestPattern: './kubernetes/users.yaml',
-                        credentialsId: env.CREDENTIALS_ID,
-                        verifyDeployments: true])
+        //         step([$class: 'KubernetesEngineBuilder', 
+        //                 projectId: env.PROJECT_ID, 
+        //                 clusterName: env.CLUSTER_NAME, 
+        //                 location: env.LOCATION,
+        //                 manifestPattern: './kubernetes/users.yaml',
+        //                 credentialsId: env.CREDENTIALS_ID,
+        //                 verifyDeployments: true])
 
-            }
-        }
+        //     }
+        // }
     }
 
     post {
