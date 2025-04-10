@@ -4,6 +4,7 @@ pipeline {
     environment {
         NODE_ENV = 'test'
         IMAGE_NAME = "jsrmedina/users-service-p7:${commit}"
+
         PROJECT_ID = 'sa-projects-10101'
         CLUSTER_NAME = 'cluster-sa-p7'
         LOCATION = 'us-central1-a'
@@ -26,7 +27,7 @@ pipeline {
         stage('Obtener commit hash') {
             steps {
                 script {
-                    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    def commit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.IMAGE_NAME = "jeser/users-service:${commit}"
                 }
             }
@@ -70,19 +71,11 @@ pipeline {
 
         stage('Configurar GKE') {
             steps {
-                step(
-                    withKubeConfig([credentialsId: env.CREDENTIALS_ID,
-                    clusterName: env.CLUSTER_NAME,
-                    namespace: env.NAMESPACE
-                    ]) {
-                        sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'  
-                        sh 'chmod u+x ./kubectl'  
-                        sh './kubectl apply -f ./kubernetes/namespace.yaml'
-                    }
-                )
+                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: './kubernetes/namespace.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
+                
+                echo 'Deployment Finished ...'
             }
         }
-
     }
 
     post {
