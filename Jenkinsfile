@@ -19,73 +19,53 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Repository') {
             steps {
                 checkout scm
             }
         }
 
         parallel {
-            // stage('Instalar dependencias Python') {
-            //     steps {
-            //         // Crear un entorno virtual
-            //         script {
-            //             sh 'python3 -m venv venv'
-            //             sh '. venv/bin/activate && pip install --upgrade pip'
-            //             sh '. venv/bin/activate && pip install -r requirements.txt'
-            //         }
-            //     }
-            // }
-
-            stage('Instalar dependencias') {
+            stage ('USERS: Install dependencies') {
                 steps {
                     dir('users') {
                         sh 'npm install'
                     }
+                }
+            }
+
+            stage ('COURSES: Install dependencies') {
+                steps {
                     dir('courses') {
                         sh 'npm install'
                     }
                 }
             }
+        }
 
-            stage('Ejecutar pruebas') {
+        parallel {
+            stage ('USERS: Execute tests') {
                 steps {
                     dir('users') {
                         sh 'npm run test'
                     }
+                }
+            }
+
+            stage ('COURSES: Execute tests') {
+                steps {
                     dir('courses') {
                         sh 'npm run test'
                     }
                 }
             }
+        }
 
-            stage('Construir imagenes de Docker') {
-                steps {
-                    dir('users') {
-                        sh "docker build -t ${USERS_FULL_IMAGE_NAME} ."
-                    }
-                    dir ('courses') {
-                        sh "docker build -t ${env.COURSES_FULL_IMAGE_NAME} ."
-                    }
-                    dir ('enrollments') {
-                        sh "docker build -t ${env.ENROLLMENTS_FULL_IMAGE_NAME} ."
-                    }
-                    dir ('evaluations') {
-                        sh "docker build -t ${env.EVALUATIONS_FULL_IMAGE_NAME} ."
-                    }
-                }
-            }
-
-
-            stage('Obtener commit hash') {
+        stage('Set image name and tag') {
                 steps {
                     script {
-                        // Obtiene el commit hash corto
                         def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                        
-                        // Asigna el commit hash a una variable de entorno
                         env.GIT_COMMIT_SHORT = commitHash
-
                         env.USERS_FULL_IMAGE_NAME = "${env.USERS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
                         env.COURSES_FULL_IMAGE_NAME = "${env.COURSES_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"   
                         env.ENROLLMENTS_FULL_IMAGE_NAME = "${env.ENROLLMENTS_BASE_IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
@@ -93,8 +73,40 @@ pipeline {
                     }
                 }
             }
+        
+        parallel {
+            stage('Build USERS Docker image') {
+                steps {
+                    dir('users') {
+                        sh "docker build -t ${USERS_FULL_IMAGE_NAME} ."
+                    }
+                }
+            }
+            stage('Build COURSES Docker image') {
+                steps {
+                    dir('courses') {
+                        sh "docker build -t ${COURSES_FULL_IMAGE_NAME} ."
+                    }
+                }
+            }
+            stage('Build ENROLLMENTS Docker image') {
+                steps {
+                    dir('enrollments') {
+                        sh "docker build -t ${ENROLLMENTS_FULL_IMAGE_NAME} ."
+                    }
+                }
+            }
+            stage('Build EVALUATIONS Docker image') {
+                steps {
+                    dir('evaluations') {
+                        sh "docker build -t ${EVALUATIONS_FULL_IMAGE_NAME} ."
+                    }
+                }
+            }        
+        }
 
-            stage('Push a Docker Hub') {
+        parallel {
+            stage('Push USERS Docker image') {
                 steps {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh '''
@@ -102,18 +114,30 @@ pipeline {
                             docker push $USERS_FULL_IMAGE_NAME
                         '''
                     }
+                }
+            }
+            stage('Push COURSES Docker image') {
+                steps {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh '''
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                             docker push $COURSES_FULL_IMAGE_NAME
                         '''
                     }
+                }
+            }
+            stage('Push ENROLLMENTS Docker image') {
+                steps {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh '''
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                             docker push $ENROLLMENTS_FULL_IMAGE_NAME
                         '''
                     }
+                }
+            }
+            stage('Push EVALUATIONS Docker image') {
+                steps {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh '''
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
@@ -122,10 +146,12 @@ pipeline {
                     }
                 }
             }
-        }     
-        
-        stage('Configurar GKE') {
+        }
+           
+        stage('Deploy to Google Kubernetes') {
             steps {
+                
+                // Users deployment
                 sh "sed -i 's|IMAGE_NAME|${USERS_FULL_IMAGE_NAME}|g' ./kubernetes/users.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
@@ -136,6 +162,8 @@ pipeline {
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: false])
 
+
+                // Courses deployment
                 sh "sed -i 's|IMAGE_NAME|${COURSES_FULL_IMAGE_NAME}|g' ./kubernetes/courses.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
@@ -146,6 +174,7 @@ pipeline {
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: false])
 
+                // Enrollments deployment
                 sh "sed -i 's|IMAGE_NAME|${ENROLLMENTS_FULL_IMAGE_NAME}|g' ./kubernetes/enrollments.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
@@ -156,6 +185,7 @@ pipeline {
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: false])
 
+                // Evaluations deployment
                 sh "sed -i 's|IMAGE_NAME|${EVALUATIONS_FULL_IMAGE_NAME}|g' ./kubernetes/evaluations.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
@@ -175,10 +205,10 @@ pipeline {
             echo 'Pipeline finalizada'
         }
         success {
-            echo '✅ Todo salió bien'
+            echo '✅ Pipeline finalizada correctamente'
         }
         failure {
-            echo '❌ Algo falló'
+            echo '❌ Error durante la ejecución de la pipeline'
         }
     }
 }
