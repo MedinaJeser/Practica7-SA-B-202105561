@@ -53,7 +53,7 @@ pipeline {
         stage('Construir imagen Docker') {
             steps {
                 dir('users') {
-                    echo "Construyendo la imagen Docker: ${IMAGE_NAME}"
+                    echo "Construyendo la imagen Docker: ${env.IMAGE_NAME}"
                     // sh "docker build -t $IMAGE_NAME ."
                 }
             }
