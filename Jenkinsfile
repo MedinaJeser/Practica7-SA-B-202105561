@@ -30,7 +30,7 @@ pipeline {
                     // Asigna el commit hash a una variable de entorno
                     env.GIT_COMMIT_SHORT = commitHash
                     // Asigna el nombre de la imagen Docker con el commit hash
-                    env.IMAGE_NAME = "jsrmedina/users-service:${env.GIT_COMMIT_SHORT}"
+                    env.IMAGE_NAME = "jsrmedina/users-service:test"
 
                     echo "Commit hash corto: ${env.GIT_COMMIT_SHORT}"
                     echo "Imagen Docker: ${env.IMAGE_NAME}"
