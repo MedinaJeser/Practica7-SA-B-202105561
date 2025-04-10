@@ -10,6 +10,8 @@ pipeline {
         LOCATION = 'us-central1-a'
         CREDENTIALS_ID = 'gke-sa-key'
         NAMESPACE = 'sa-p7'
+
+        MY_VAR = 'valor_inicial'
     }
 
     tools {
@@ -26,6 +28,11 @@ pipeline {
         stage('Obtener commit hash') {
             steps {
                 script {
+                    def newVar = sh(script: 'echo hello', returnStdout: true).trim()
+                    env.MY_VAR = newVar
+                    
+                    echo "Valor de MY_VAR: ${env.MY_VAR}"
+
                     env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.IMAGE_NAME = "jsrmedina/users-service:${env.GIT_COMMIT_SHORT}"
                     echo "Commit ID: ${env.GIT_COMMIT_SHORT}"
