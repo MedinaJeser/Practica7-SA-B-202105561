@@ -33,47 +33,55 @@ pipeline {
             }
         }
 
-        // stage('Instalar dependencias') {
-        //     steps {
-        //         dir('users') {
-        //             sh 'npm install'
-        //         }
-        //     }
-        // }
+        stage('Instalar dependencias') {
+            steps {
+                dir('users') {
+                    sh 'npm install'
+                }
+            }
+        }
 
-        // stage('Ejecutar pruebas') {
-        //     steps {
-        //         dir('users') {
-        //             // Ejecuta los tests de la aplicación
-        //             sh 'npm run test'
-        //         }
-        //     }
-        // }
+        stage('Ejecutar pruebas') {
+            steps {
+                dir('users') {
+                    // Ejecuta los tests de la aplicación
+                    sh 'npm run test'
+                }
+            }
+        }
 
-        // stage('Construir imagen Docker') {
-        //     steps {
-        //         dir('users') {
-        //             sh "docker build -t $IMAGE_NAME ."
-        //         }
-        //     }
-        // }
+        stage('Construir imagen Docker') {
+            steps {
+                dir('users') {
+                    sh "docker build -t $IMAGE_NAME ."
+                }
+            }
+        }
 
-        // stage('Push a Docker Hub') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-        //             sh '''
-        //                 echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-        //                 docker push $IMAGE_NAME
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Push a Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $IMAGE_NAME
+                    '''
+                }
+            }
+        }
 
         stage('Configurar GKE') {
             steps {
-                step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: './kubernetes/namespace.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
-                
-                echo 'Deployment Finished ...'
+                // Reemplazar ${IMAGE} con el valor real
+                sh "sed -i 's|\\${IMAGE}|${IMAGE_NAME}|g' ./kubernetes/users.yaml"
+
+                step([$class: 'KubernetesEngineBuilder', 
+                        projectId: env.PROJECT_ID, 
+                        clusterName: env.CLUSTER_NAME, 
+                        location: env.LOCATION,
+                        manifestPattern: './kubernetes/users.yaml',
+                        credentialsId: env.CREDENTIALS_ID,
+                        verifyDeployments: true])
+
             }
         }
     }
