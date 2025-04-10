@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: enrollments-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 8002
           env:

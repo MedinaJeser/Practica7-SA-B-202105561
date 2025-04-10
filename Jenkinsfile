@@ -160,7 +160,7 @@ pipeline {
             steps {
                 
                 // Users deployment
-                sh "sed -i 's|IMAGE_NAME|${USERS_FULL_IMAGE_NAME}|g' ./kubernetes/users.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${USERS_FULL_IMAGE_NAME}|g' ./kubernetes/users.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
                         projectId: env.PROJECT_ID, 
@@ -172,7 +172,7 @@ pipeline {
 
 
                 // Courses deployment
-                sh "sed -i 's|IMAGE_NAME|${COURSES_FULL_IMAGE_NAME}|g' ./kubernetes/courses.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${COURSES_FULL_IMAGE_NAME}|g' ./kubernetes/courses.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
                         projectId: env.PROJECT_ID, 
@@ -183,7 +183,7 @@ pipeline {
                         verifyDeployments: false])
 
                 // Enrollments deployment
-                sh "sed -i 's|IMAGE_NAME|${ENROLLMENTS_FULL_IMAGE_NAME}|g' ./kubernetes/enrollments.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${ENROLLMENTS_FULL_IMAGE_NAME}|g' ./kubernetes/enrollments.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
                         projectId: env.PROJECT_ID, 
@@ -194,7 +194,7 @@ pipeline {
                         verifyDeployments: false])
 
                 // Evaluations deployment
-                sh "sed -i 's|IMAGE_NAME|${EVALUATIONS_FULL_IMAGE_NAME}|g' ./kubernetes/evaluations.yaml"
+                sh "sed -i 's|IMAGE_NAME_SETTER|${EVALUATIONS_FULL_IMAGE_NAME}|g' ./kubernetes/evaluations.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
                         projectId: env.PROJECT_ID, 

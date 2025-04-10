@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: courses-ms-container
-          image: IMAGE_NAME
+          image: IMAGE_NAME_SETTER
           ports:
             - containerPort: 3002
           env:
