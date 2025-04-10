@@ -27,13 +27,11 @@ pipeline {
                 script {
                     // Obtiene el commit hash corto
                     def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    
                     // Asigna el commit hash a una variable de entorno
                     env.GIT_COMMIT_SHORT = commitHash
-                    // Asigna el nombre de la imagen Docker con el commit hash
-                    env.IMAGE_NAME = "jsrmedina/users-service:test"
-
+                    
                     echo "Commit hash corto: ${env.GIT_COMMIT_SHORT}"
-                    echo "Imagen Docker: ${env.IMAGE_NAME}"
                 }
             }
         }
@@ -58,7 +56,7 @@ pipeline {
         stage('Construir imagen Docker') {
             steps {
                 dir('users') {
-                    echo "Construyendo la imagen Docker: ${env.IMAGE_NAME}"
+                    echo "Construyendo la imagen Docker: ${env.IMAGE_NAME}:${env.GIT_COMMIT_SHORT}"
                     // sh "docker build -t $IMAGE_NAME ."
                 }
             }
