@@ -25,37 +25,41 @@ pipeline {
             }
         }
 
-        parallel {
-            stage ('USERS: Install dependencies') {
-                steps {
-                    dir('users') {
-                        sh 'npm install'
+        stage('Install Dependencies') {
+            parallel {
+                stage ('USERS: Install dependencies') {
+                    steps {
+                        dir('users') {
+                            sh 'npm install'
+                        }
                     }
                 }
-            }
 
-            stage ('COURSES: Install dependencies') {
-                steps {
-                    dir('courses') {
-                        sh 'npm install'
+                stage ('COURSES: Install dependencies') {
+                    steps {
+                        dir('courses') {
+                            sh 'npm install'
+                        }
                     }
                 }
             }
         }
-
-        parallel {
-            stage ('USERS: Execute tests') {
-                steps {
-                    dir('users') {
-                        sh 'npm run test'
+        
+        stage('Execute tests') {
+            parallel {
+                stage ('USERS: Execute tests') {
+                    steps {
+                        dir('users') {
+                            sh 'npm run test'
+                        }
                     }
                 }
-            }
 
-            stage ('COURSES: Execute tests') {
-                steps {
-                    dir('courses') {
-                        sh 'npm run test'
+                stage ('COURSES: Execute tests') {
+                    steps {
+                        dir('courses') {
+                            sh 'npm run test'
+                        }
                     }
                 }
             }
@@ -74,80 +78,84 @@ pipeline {
                 }
             }
         
-        parallel {
-            stage('Build USERS Docker image') {
-                steps {
-                    dir('users') {
-                        sh "docker build -t ${USERS_FULL_IMAGE_NAME} ."
+        stage('Build Docker images') {
+            parallel {
+                stage('Build USERS Docker image') {
+                    steps {
+                        dir('users') {
+                            sh "docker build -t ${USERS_FULL_IMAGE_NAME} ."
+                        }
                     }
                 }
+                stage('Build COURSES Docker image') {
+                    steps {
+                        dir('courses') {
+                            sh "docker build -t ${COURSES_FULL_IMAGE_NAME} ."
+                        }
+                    }
+                }
+                stage('Build ENROLLMENTS Docker image') {
+                    steps {
+                        dir('enrollments') {
+                            sh "docker build -t ${ENROLLMENTS_FULL_IMAGE_NAME} ."
+                        }
+                    }
+                }
+                stage('Build EVALUATIONS Docker image') {
+                    steps {
+                        dir('evaluations') {
+                            sh "docker build -t ${EVALUATIONS_FULL_IMAGE_NAME} ."
+                        }
+                    }
+                }        
             }
-            stage('Build COURSES Docker image') {
-                steps {
-                    dir('courses') {
-                        sh "docker build -t ${COURSES_FULL_IMAGE_NAME} ."
-                    }
-                }
-            }
-            stage('Build ENROLLMENTS Docker image') {
-                steps {
-                    dir('enrollments') {
-                        sh "docker build -t ${ENROLLMENTS_FULL_IMAGE_NAME} ."
-                    }
-                }
-            }
-            stage('Build EVALUATIONS Docker image') {
-                steps {
-                    dir('evaluations') {
-                        sh "docker build -t ${EVALUATIONS_FULL_IMAGE_NAME} ."
-                    }
-                }
-            }        
         }
 
-        parallel {
-            stage('Push USERS Docker image') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push $USERS_FULL_IMAGE_NAME
-                        '''
+        stage('Push Docker images') {
+            parallel {
+                stage('Push USERS Docker image') {
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push $USERS_FULL_IMAGE_NAME
+                            '''
+                        }
                     }
                 }
-            }
-            stage('Push COURSES Docker image') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push $COURSES_FULL_IMAGE_NAME
-                        '''
+                stage('Push COURSES Docker image') {
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push $COURSES_FULL_IMAGE_NAME
+                            '''
+                        }
                     }
                 }
-            }
-            stage('Push ENROLLMENTS Docker image') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push $ENROLLMENTS_FULL_IMAGE_NAME
-                        '''
+                stage('Push ENROLLMENTS Docker image') {
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push $ENROLLMENTS_FULL_IMAGE_NAME
+                            '''
+                        }
                     }
                 }
-            }
-            stage('Push EVALUATIONS Docker image') {
-                steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push $EVALUATIONS_FULL_IMAGE_NAME
-                        '''
+                stage('Push EVALUATIONS Docker image') {
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh '''
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                docker push $EVALUATIONS_FULL_IMAGE_NAME
+                            '''
+                        }
                     }
                 }
             }
         }
-           
+        
         stage('Deploy to Google Kubernetes') {
             steps {
                 
