@@ -72,13 +72,13 @@ pipeline {
         stage('Configurar GKE') {
             steps {
                 // Reemplazar ${IMAGE} con el valor real
-                sh "sed -i 's|\\${IMAGE}|${IMAGE_NAME}|g' ./kubernetes/users.yaml"
+                sh "sed -i 's|IMAGE_NAME|${IMAGE_NAME}|g' kubernetes/users.yaml"
 
                 step([$class: 'KubernetesEngineBuilder', 
                         projectId: env.PROJECT_ID, 
                         clusterName: env.CLUSTER_NAME, 
                         location: env.LOCATION,
-                        manifestPattern: './kubernetes/users.yaml',
+                        manifestPattern: '/kubernetes/users.yaml',
                         credentialsId: env.CREDENTIALS_ID,
                         verifyDeployments: true])
 

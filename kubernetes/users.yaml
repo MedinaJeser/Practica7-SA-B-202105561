@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: users-ms-container
-          image: ${IMAGE}
+          image: IMAGE_NAME
           ports:
             - containerPort: 3001
           env:
