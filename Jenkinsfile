@@ -3,15 +3,12 @@ pipeline {
 
     environment {
         NODE_ENV = 'test'
-        GIT_COMMIT_SHORT = ''
         IMAGE_NAME = "jsrmedina/users-service-p7"
         PROJECT_ID = 'sa-projects-10101'
         CLUSTER_NAME = 'cluster-sa-p7'
         LOCATION = 'us-central1-a'
         CREDENTIALS_ID = 'gke-sa-key'
         NAMESPACE = 'sa-p7'
-
-        MY_VAR = 'valor_inicial'
     }
 
     tools {
@@ -28,14 +25,14 @@ pipeline {
         stage('Obtener commit hash') {
             steps {
                 script {
-                    def newVar = sh(script: 'echo hello', returnStdout: true).trim()
-                    env.MY_VAR = newVar
-                    
-                    echo "Valor de MY_VAR: ${env.MY_VAR}"
-
-                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    // Obtiene el commit hash corto
+                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    // Asigna el commit hash a una variable de entorno
+                    env.GIT_COMMIT_SHORT = commitHash
+                    // Asigna el nombre de la imagen Docker con el commit hash
                     env.IMAGE_NAME = "jsrmedina/users-service:${env.GIT_COMMIT_SHORT}"
-                    echo "Commit ID: ${env.GIT_COMMIT_SHORT}"
+
+                    echo "Commit hash corto: ${env.GIT_COMMIT_SHORT}"
                     echo "Imagen Docker: ${env.IMAGE_NAME}"
                 }
             }
