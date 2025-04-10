@@ -42,16 +42,16 @@ pipeline {
             }
         }
         
-        stage('Instalar dependencias Python') {
-            steps {
-                // Crear un entorno virtual
-                script {
-                    sh 'python3 -m venv venv'
-                    sh '. venv/bin/activate && pip install --upgrade pip'
-                    sh '. venv/bin/activate && pip install -r requirements.txt'
-                }
-            }
-        }
+        // stage('Instalar dependencias Python') {
+        //     steps {
+        //         // Crear un entorno virtual
+        //         script {
+        //             sh 'python3 -m venv venv'
+        //             sh '. venv/bin/activate && pip install --upgrade pip'
+        //             sh '. venv/bin/activate && pip install -r requirements.txt'
+        //         }
+        //     }
+        // }
 
         stage('Instalar dependencias') {
             steps {
