@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         NODE_ENV = 'test'
-        IMAGE_NAME = "jsrmedina/users-service-p7:${commit}"
+        IMAGE_NAME = "jsrmedina/users-service-p7"
         PROJECT_ID = 'sa-projects-10101'
         CLUSTER_NAME = 'cluster-sa-p7'
         LOCATION = 'us-central1-a'
@@ -27,8 +27,9 @@ pipeline {
             steps {
                 script {
                     def commit = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-                    env.IMAGE_NAME = "jeser/users-service:${commit}"
+                    env.IMAGE_NAME = "jsrmedina/users-service:${commit}"
                     echo "Commit ID: ${commit}"
+                    echo "Imagen Docker: ${env.IMAGE_NAME}"
                 }
             }
         }
