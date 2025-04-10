@@ -65,10 +65,14 @@ pipeline {
 
         stage('Configurar GKE') {
             steps {
+                withEnv(['GCLOUD_PATH=/var/jenkins_home/google-cloud-sdk/bin']) {
+                    sh '$GCLOUD_PATH/gcloud --version'
+                }
+                
                 withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GKE_CREDS')]) {
                     sh '''
                         export PATH=$PATH:/usr/lib/google-cloud-sdk/bin
-                        
+
                         gcloud auth activate-service-account --key-file=$GKE_CREDS
 
                         # Configurar acceso al cluster de GKE
