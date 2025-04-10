@@ -63,13 +63,17 @@ pipeline {
             }
         }
 
-        stage('Autenticarse en GKE') {
+        stage('Configurar GKE') {
             steps {
-                withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GKE_CREDS')]) {
                     sh '''
-                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                        gcloud config set project sa-projects-10101
+                        gcloud auth activate-service-account --key-file=$GKE_CREDS
+
+                        # Configurar acceso al cluster de GKE
                         gcloud container clusters get-credentials cluster-sa-p7 --zone us-central1-a --project sa-projects-10101
+
+                        # Verificar que kubectl está apuntando al cluster correcto
+                        kubectl config current-context
                     '''
                 }
             }
