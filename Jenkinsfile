@@ -4,6 +4,11 @@ pipeline {
     environment {
         NODE_ENV = 'test'
         IMAGE_NAME = "jsrmedina/users-service-p7:${commit}"
+        PROJECT_ID = 'sa-projects-10101'
+        CLUSTER_NAME = 'cluster-sa-p7'
+        LOCATION = 'us-central1-a'
+        CREDENTIALS_ID = 'gke-sa-key'
+        NAMESPACE = 'sa-p7'
     }
 
     tools {
@@ -65,23 +70,16 @@ pipeline {
 
         stage('Configurar GKE') {
             steps {
-                withEnv(['GCLOUD_PATH=/var/jenkins_home/google-cloud-sdk/bin']) {
-                    sh '$GCLOUD_PATH/gcloud --version'
-                }
-                
-                withCredentials([file(credentialsId: 'gcp-sa-key', variable: 'GKE_CREDS')]) {
-                    sh '''
-                        export PATH=$PATH:/usr/lib/google-cloud-sdk/bin
-
-                        gcloud auth activate-service-account --key-file=$GKE_CREDS
-
-                        # Configurar acceso al cluster de GKE
-                        gcloud container clusters get-credentials cluster-sa-p7 --zone us-central1-a --project sa-projects-10101
-
-                        # Verificar que kubectl está apuntando al cluster correcto
-                        kubectl config current-context
-                    '''
-                }
+                step(
+                    withKubeConfig([credentialsId: env.CREDENTIALS_ID,
+                    clusterName: env.CLUSTER_NAME,
+                    namespace: env.NAMESPACE
+                    ]) {
+                        sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'  
+                        sh 'chmod u+x ./kubectl'  
+                        sh './kubectl apply -f ./kubernetes/namespace.yaml'
+                    }
+                )
             }
         }
 
