@@ -14,6 +14,14 @@ import { User } from './schemas/user.schema';
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
 
+    @Get('calificacion')
+    async calificacion() {
+        return {
+        message: 'Calificación obtenida exitosamente',
+        status: 'success',
+        };
+    }
+
     @Post()
     async create(@Body() userData: Partial<User>): Promise<User> {
         return this.usersService.create(userData);
